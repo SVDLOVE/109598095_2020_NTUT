@@ -1,4 +1,7 @@
+import java.io.IOException;
 import java.util.Scanner;
+import java.util.Vector;
+import java.util.regex.Pattern;
 
 public class TextUI {
     public static int LOAD=1;
@@ -6,81 +9,112 @@ public class TextUI {
     public static int DISPLAY =3;
     public static int EXIT =4;
     private LogicSimulator LS = new LogicSimulator();
-    Boolean loadfile = false;
+
+    public TextUI(){
+
+    }
+
+    private  class  BooleanLoad{
+        private Boolean loadfile;
+
+        BooleanLoad(){
+            this.loadfile = false;
+        }
+
+        public void setLoadfile(Boolean loadfile) {
+            this.loadfile = loadfile;
+        }
+
+        public Boolean getLoadfile() {
+            return loadfile;
+        }
+    }
+
     private void displayMenu() {
         System.out.println("1. Load logic circuit file \n2. Simulation \n3. Display truth table \n4. Exit Command: \n");
     }
-    public void processCommand() {
-        int CommandNumber;
+    public void processCommand() throws IOException {
+        String CommandString;
+        BooleanLoad loadfile=new BooleanLoad();
         while (true)
         {
             displayMenu();
             Scanner scanner = new Scanner(System.in);
-            if (cin >> CommandNumber && CommandNumber <= 4 && CommandNumber >= 1) {//確保輸入的值在1到4之間
-                if (processFourCommend(CommandNumber) == false) break;//輸入4就break結束迴圈
+            CommandString=scanner.next();
+            if (isInteger(CommandString) && Integer.parseInt(CommandString) <= 4 && Integer.parseInt(CommandString) >= 1) {
+                if (processFourCommend(Integer.parseInt(CommandString),loadfile) == false) break;
             }
             else {
-                //輸入不在1~4時的狀況
-                cout << "please input number in 1~4" << endl << endl;
-                cin.clear();
-                cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                System.out.println("please input number in 1~4\n") ;
             }
         }
     }
-    private Boolean processFourCommend(int CommandNumber) {//處理四種指令
+
+    public static boolean isInteger(String str) {
+        Pattern pattern = Pattern.compile("^[-\\+]?[\\d]*$");
+        return pattern.matcher(str).matches();
+    }
+
+    private Boolean processFourCommend(int CommandNumber,BooleanLoad loadfile) throws IOException {//處理四種指令
         if (CommandNumber == LOAD) {
-            loadCommand();
+            loadCommand(loadfile);
         }
         else if (CommandNumber == SIMULATION) {
-            if (notLoadFille() == true) return true;
+            if (notLoadFille(loadfile) == true) return true;
             simulationCommend();
         }
         else if (CommandNumber == DISPLAY) {
-            if (notLoadFille() == true) return true;
-            cout << LS->getTruthTable() << endl;
+            if (notLoadFille(loadfile) == true) return true;
+            System.out.println( LS.getTruthTable());
         }
         else if (CommandNumber == EXIT) {
-            cout << "Goodbye, thanks for using LS." << endl;
+            System.out.println("Goodbye, thanks for using LS.");
             return false;
         }
         return true;
     }
-    private Boolean notLoadFille() {//判斷是否有成功load檔案
-        if (loadfile == false) {
-            cout << "Please load an lcf file, before using this operation." << endl << endl;
+    private Boolean notLoadFille(BooleanLoad loadfile) {//判斷是否有成功load檔案
+        if (loadfile.getLoadfile() == false) {
+            System.out.println("Please load an lcf file, before using this operation.\n");
             return true;
         }
         return false;
     }
-    private void loadCommand() {//執行load指令
-        string FilePath;
-        cout << "Please key in a file path: ";
-        cin >> FilePath;
-        loadfile = LS->load(FilePath);
-        if (loadfile == false) {
-            cout << "File not found or file format error!!" << endl << endl;
+    private void loadCommand(BooleanLoad loadfile) throws IOException {//執行load指令
+        Scanner scanner = new Scanner(System.in);
+        String FilePath;
+        System.out.println("Please key in a file path: ");
+        FilePath=scanner.next();
+        loadfile.setLoadfile(LS.load(FilePath));
+        if (loadfile.getLoadfile() == false) {
+            System.out.println("File not found or file format error!!\n");
         }
         else {
-            cout << "Circuit: " << LS->getiPinsSize() << " input pins, " << LS->getoPinsSize()
-                    << " output pins and " << LS.getCircuitSize() << " gates" << endl << endl;
+            System.out.println("Circuit: " + LS.getiPinsSize() + " input pins, " + LS.getoPinsSize()
+                    + " output pins and " + LS.getCircuitSize() + " gates\n");
         }
     }
     private void simulationCommend() {//執行simulation指令
+        Scanner scanner = new Scanner(System.in);
         int PinQuantity = LS.getiPinsSize();
-        vector<int> PinValues(PinQuantity);
-        int value = 0;
+        Vector<Boolean> PinValues= new Vector<>();
+        for(int i=0;i<PinQuantity;i++){
+            PinValues.add(true);
+        }
+        String value = "0";
         for (int i = 0; i < PinQuantity; i++) {
-            cout << "Please key in the value of input pin " << (i + 1) << ":";
-            if (cin >> value && value >= 0 && value <= 1) {
-                PinValues[i] = value;
+            System.out.println("Please key in the value of input pin " + (i + 1) + ":");
+            value=scanner.next();
+            if (isInteger(value) && Integer.parseInt(value) <= 1 && Integer.parseInt(value) >= 0) {
+                if(Integer.parseInt(value)==0){
+                    PinValues.set(i,false);
+                }
             }
             else {
                 i--;
-                cout << "The value of input pin must be 0/1" << endl;
-                cin.clear();
-                cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                System.out.println("The value of input pin must be 0/1");
             }
         }
-        cout << LS->getSimulationResult(PinValues) << endl;
+        System.out.println(LS.getSimulationResult(PinValues));
     }
 }

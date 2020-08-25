@@ -1,7 +1,4 @@
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.Vector;
 
 import static java.lang.Math.abs;
@@ -39,21 +36,24 @@ public class LogicSimulator {
             return inputPins;
         }
     }
-    public void load(String file1Path) throws IOException {
-        FileReader fr = new FileReader(file1Path);
+    public Boolean load(String filePath) throws IOException {
+        File file = new File(filePath);
+        if(!file.exists()) return false;
+        FileReader fr = new FileReader(filePath);
         BufferedReader br = new BufferedReader(fr);
         GatesAndInputPins gatesAndInputPins=new GatesAndInputPins() ;
         initializeinputPin(br,gatesAndInputPins);
         Vector<String[]> gatestring=new Vector<>();
         makeGates(br, gatestring, gatesAndInputPins);
+        fr.close();
         br.close();
-        Vector<Integer> isoPin=new Vector();
+        Vector<Integer> isoPin=new Vector<>();
         for(int i=0;i<gatesAndInputPins.getGates();i++){
             isoPin.add(1);
         }
         makeCircuit(gatestring, isoPin, gatesAndInputPins);
         findOutputPin(isoPin, gatesAndInputPins);
-        fr.close();
+        return true;
     }
 
     void initializeinputPin(BufferedReader input,GatesAndInputPins gatesAndInputPins) throws IOException {
@@ -87,7 +87,6 @@ public class LogicSimulator {
         double gatePin;
         for (int i = 0; i < gatesAndInputPins.getGates(); i++) {
             int size = gatestring.get(i).length;
-            //System.out.println(size);
             for (int j = 1; j < size - 1; j++)
             {
                 gatePin =Double.parseDouble(gatestring.get(i)[j]);
