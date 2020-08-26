@@ -8,13 +8,13 @@ public class TextUI {
     public static int SIMULATION =2;
     public static int DISPLAY =3;
     public static int EXIT =4;
-    private LogicSimulator LS = new LogicSimulator();
+    private final LogicSimulator LS = new LogicSimulator();
 
     public TextUI(){
 
     }
 
-    private  class  BooleanLoad{
+    private static class  BooleanLoad{
         private Boolean loadfile;
 
         BooleanLoad(){
@@ -35,14 +35,14 @@ public class TextUI {
     }
     public void processCommand() throws IOException {
         String CommandString;
-        BooleanLoad loadfile=new BooleanLoad();
+        BooleanLoad loadfile= new BooleanLoad();
         while (true)
         {
             displayMenu();
             Scanner scanner = new Scanner(System.in);
             CommandString=scanner.next();
             if (isInteger(CommandString) && Integer.parseInt(CommandString) <= 4 && Integer.parseInt(CommandString) >= 1) {
-                if (processFourCommend(Integer.parseInt(CommandString),loadfile) == false) break;
+                if (!processFourCommend(Integer.parseInt(CommandString), loadfile)) break;
             }
             else {
                 System.out.println("please input number in 1~4\n") ;
@@ -51,20 +51,20 @@ public class TextUI {
     }
 
     public static boolean isInteger(String str) {
-        Pattern pattern = Pattern.compile("^[-\\+]?[\\d]*$");
+        Pattern pattern = Pattern.compile("^[-+]?[\\d]*$");
         return pattern.matcher(str).matches();
     }
 
-    private Boolean processFourCommend(int CommandNumber,BooleanLoad loadfile) throws IOException {//處理四種指令
+    private Boolean processFourCommend(int CommandNumber,BooleanLoad loadfile) throws IOException {
         if (CommandNumber == LOAD) {
             loadCommand(loadfile);
         }
         else if (CommandNumber == SIMULATION) {
-            if (notLoadFille(loadfile) == true) return true;
+            if (notLoadFille(loadfile)) return true;
             simulationCommend();
         }
         else if (CommandNumber == DISPLAY) {
-            if (notLoadFille(loadfile) == true) return true;
+            if (notLoadFille(loadfile)) return true;
             System.out.println( LS.getTruthTable());
         }
         else if (CommandNumber == EXIT) {
@@ -73,20 +73,20 @@ public class TextUI {
         }
         return true;
     }
-    private Boolean notLoadFille(BooleanLoad loadfile) {//判斷是否有成功load檔案
-        if (loadfile.getLoadfile() == false) {
+    private Boolean notLoadFille(BooleanLoad loadfile) {
+        if (!loadfile.getLoadfile()) {
             System.out.println("Please load an lcf file, before using this operation.\n");
             return true;
         }
         return false;
     }
-    private void loadCommand(BooleanLoad loadfile) throws IOException {//執行load指令
+    private void loadCommand(BooleanLoad loadfile) throws IOException {
         Scanner scanner = new Scanner(System.in);
         String FilePath;
         System.out.println("Please key in a file path: ");
         FilePath=scanner.next();
         loadfile.setLoadfile(LS.load(FilePath));
-        if (loadfile.getLoadfile() == false) {
+        if (!loadfile.getLoadfile()) {
             System.out.println("File not found or file format error!!\n");
         }
         else {
@@ -94,14 +94,14 @@ public class TextUI {
                     + " output pins and " + LS.getCircuitSize() + " gates\n");
         }
     }
-    private void simulationCommend() {//執行simulation指令
+    private void simulationCommend() {
         Scanner scanner = new Scanner(System.in);
         int PinQuantity = LS.getiPinsSize();
         Vector<Boolean> PinValues= new Vector<>();
         for(int i=0;i<PinQuantity;i++){
             PinValues.add(true);
         }
-        String value = "0";
+        String value;
         for (int i = 0; i < PinQuantity; i++) {
             System.out.println("Please key in the value of input pin " + (i + 1) + ":");
             value=scanner.next();

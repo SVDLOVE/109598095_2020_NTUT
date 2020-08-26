@@ -13,7 +13,7 @@ public class LogicSimulator {
 
     }
 
-    private class GatesAndInputPins{
+    private static class GatesAndInputPins{
         private int gates,inputPins;
         GatesAndInputPins(){
             this.gates=0;
@@ -41,7 +41,7 @@ public class LogicSimulator {
         if(!file.exists()) return false;
         FileReader fr = new FileReader(filePath);
         BufferedReader br = new BufferedReader(fr);
-        GatesAndInputPins gatesAndInputPins=new GatesAndInputPins() ;
+        GatesAndInputPins gatesAndInputPins= new GatesAndInputPins();
         initializeinputPin(br,gatesAndInputPins);
         Vector<String[]> gatestring=new Vector<>();
         makeGates(br, gatestring, gatesAndInputPins);
@@ -57,8 +57,8 @@ public class LogicSimulator {
     }
 
     void initializeinputPin(BufferedReader input,GatesAndInputPins gatesAndInputPins) throws IOException {
-        gatesAndInputPins.setInputPins(Integer.valueOf(input.readLine()));
-        gatesAndInputPins.setGates(Integer.valueOf(input.readLine()));
+        gatesAndInputPins.setInputPins(Integer.parseInt(input.readLine()));
+        gatesAndInputPins.setGates(Integer.parseInt(input.readLine()));
         iPins= new Vector<>();
         for (int i = 0; i < gatesAndInputPins.getInputPins(); i++) {
             iPins.add(new IPin());
@@ -132,82 +132,80 @@ public class LogicSimulator {
     }
 
     public String getSimulationResult(Vector<Boolean> inputValues) {
-        String truthtable = "Simulation Result:";
-        truthtable += displayTableTop();
+        StringBuilder truthtable = new StringBuilder("Simulation Result:");
+        truthtable.append(displayTableTop());
         int size = iPins.size();
         for (int i = 0; i < size; i++) {
             String truefalse = "1";
-            if(inputValues.get(i)==false){
+            if(!inputValues.get(i)){
                 truefalse="0";
             }
-            truthtable += truefalse + " ";
+            truthtable.append(truefalse).append(" ");
             iPins.get(i).setInput(inputValues.get(i));
         }
-        truthtable += "|" ;
-        int osize = oPins.size();
-        for (int i = 0; i < osize; i++) {
+        truthtable.append("|");
+        for (Device oPin : oPins) {
             String truefalse = "1";
-            if(oPins.get(i).getOutput()==false){
-                truefalse="0";
+            if (!oPin.getOutput()) {
+                truefalse = "0";
             }
-            truthtable += " " + truefalse;
+            truthtable.append(" ").append(truefalse);
         }
-        truthtable += "\n" ;
-        return truthtable;
+        truthtable.append("\n");
+        return truthtable.toString();
     }
 
     String getTruthTable() {
-        String truthtable = "Truth table:";
-        truthtable += displayTableTop();
+        StringBuilder truthtable = new StringBuilder("Truth table:");
+        truthtable.append(displayTableTop());
         int isize = iPins.size();
         for (int i = 0; i < mypow(isize); i++) {
-            for (int j = 0, k = i, l = isize - 1; j < isize; j++, l--) {
-                int m = (k / mypow(l)) % 2;
-                Boolean truefalse = true;
+            for (int j = 0, l = isize - 1; j < isize; j++, l--) {
+                int m = (i / mypow(l)) % 2;
+                boolean truefalse = true;
                 if(m==0){
                     truefalse=false;
                 }
                 iPins.get(j).setInput(truefalse);
-                truthtable += m + " ";
+                truthtable.append(m).append(" ");
             }
-            truthtable += "|";
-            int osize = oPins.size();
-            for (int j = 0; j < osize; j++) {
+            truthtable.append("|");
+            for (Device oPin : oPins) {
                 String truefalse = "1";
-                if(oPins.get(j).getOutput()==false){
-                    truefalse="0";
+                if (!oPin.getOutput()) {
+                    truefalse = "0";
                 }
-                truthtable += " " + truefalse ;
+                truthtable.append(" ").append(truefalse);
             }
-            truthtable += "\n";
+            truthtable.append("\n");
         }
-        return truthtable;
+        return truthtable.toString();
     }
 
     String displayTableTop() {
         String truthtable = "\n";
         truthtable+=displayTableRow("i ","","|"," o","");
-        truthtable+=displayTableRow(""," ","|"," ","");
+        truthtable+=displayTableRow(""," ","|"," "," ");
         truthtable+=displayTableRow("--","","+","--","");
         return truthtable;
     }
 
     String displayTableRow(String leftone,String lefttwo,String middle,String rightone,String righttwo) {
-        String truthtable ="";
+        StringBuilder truthtable = new StringBuilder();
         int isize = iPins.size();
         int osize = oPins.size();
         //System.out.println(osize+" "+ isize);
         for (int i = 1; i <= isize; i++) {
             if(lefttwo.equals(" ")) leftone=Integer.toString(i);
-            truthtable += leftone+lefttwo;
+            truthtable.append(leftone).append(lefttwo);
         }
-        truthtable +=middle;
+        truthtable.append(middle);
         for (int i = 1; i <= osize; i++) {
             if(lefttwo.equals(" ")) righttwo=Integer.toString(i);
-            truthtable += rightone+righttwo;
+            truthtable.append(rightone).append(righttwo);
         }
-        truthtable +="\n";
-        return truthtable;
+        truthtable.append("\n");
+        return truthtable.toString();
     }
 
 
