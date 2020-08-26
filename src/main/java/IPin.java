@@ -1,8 +1,9 @@
 public class IPin extends Device {
 
     private boolean BooleanValue;
-    public IPin(){
-            super();
+
+    public IPin() {
+        super();
     }
 
     @Override
